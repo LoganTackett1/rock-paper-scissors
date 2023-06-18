@@ -3,3 +3,81 @@
     padding: 0;
 }
 
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    display: grid;
+    grid: 1fr 3fr 1fr / 1fr 3fr 1fr;
+    --proportion : 1;
+}
+
+.board-image {
+    grid-area: 2/2/-2/-2;
+    width: 100%;
+    height: 100%;
+}
+
+.reset {
+    border: solid black calc(3px*var(--proportion));
+    border-radius: 10px;
+    background-color: transparent;
+    color: black;
+    font-size: calc(16px*var(--proportion));
+    font-weight: bold;
+    grid-area: 3/2/-1/-2;
+    width: 33%;
+    height: 33%;
+    justify-self: center;
+    align-self: center;
+}
+
+.reset:hover {
+    border-color: red;
+    color: red;
+}
+
+.p1, .p2 {
+    font-size: calc(52px*var(--proportion));
+    text-align: center;
+    grid-area: 1/2/2/-2;
+    align-self: center;
+    color: gray;
+}
+
+.p1 {
+    justify-self: flex-start;
+}
+
+.p2 {
+    justify-self: flex-end;
+}
+
+.my-turn {
+    color: black;
+    font-size: calc(57px*var(--proportion));
+    font-weight: bold;
+}
+
+.slot-container {
+    grid-area: 2/2/-2/-2;
+    display: grid;
+    grid: 1fr 1fr 1fr / 1fr 1fr 1fr;
+    width: 100%;
+    height: 100%;
+}
+
+.slot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(150px*var(--proportion));
+}
+
+/*Make font size of X and O scale with the window using css varaibles and JS*/
+
