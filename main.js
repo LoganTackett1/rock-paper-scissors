@@ -92,6 +92,15 @@ const Board = (function () {
         Game.reset();
     });
 
+    const AIBtn = document.querySelector('.computer');
+    const AITrue = false;
+
+    AIBtn.addEventListener('click', () => {
+        Board.AITrue = !Board.AITrue;
+        AIBtn.classList.toggle('off');
+        AIBtn.classList.toggle('on');
+    });
+
     const slots = document.getElementsByClassName("slot");
     const p1 = document.querySelector(".p1");
     const p2 = document.querySelector(".p2");
@@ -142,6 +151,7 @@ const Board = (function () {
 
     return {
         slots,
-        refresh
+        refresh,
+        AITrue
     }
 })()
