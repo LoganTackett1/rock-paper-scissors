@@ -239,7 +239,8 @@ const AI = (function () {
                     position[i][j] = marker;
                     branchValues.push({
                         move : [i,j],
-                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer,player)});
+                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer,player)
+                    })
                     position[i][j] = "";
                 }
             }
