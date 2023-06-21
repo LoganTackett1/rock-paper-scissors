@@ -34,6 +34,12 @@ const Game = (function () {
             Game.p1Turn = !Game.p1Turn;
             Game.p2Turn = !Game.p2Turn;
             Board.refresh();
+            if (Game.winningRow == null) {
+                if (Game.p2Turn == true && Board.AITrue == true) {
+                    let aiMove = AI.calcMove(Game.array);
+                    doTurn(aiMove[0],aiMove[1]);
+                }
+            }
         }
     }
 
@@ -99,6 +105,10 @@ const Board = (function () {
         Board.AITrue = !Board.AITrue;
         AIBtn.classList.toggle('off');
         AIBtn.classList.toggle('on');
+        if (Game.p2Turn == true) {
+            let aiMove = AI.calcMove(Game.array);
+            Game.doTurn(aiMove[0],aiMove[1]);
+        }
     });
 
     const slots = document.getElementsByClassName("slot");
@@ -155,3 +165,81 @@ const Board = (function () {
         AITrue
     }
 })()
+
+const AI = (function () {
+    const calcMove = function (board) {
+        return minimax(board,0,0,0,true);
+    }
+
+    function checkLine (position,coord1,coord2,coord3) {
+        if (position[coord1[0]][coord1[1]] == position[coord2[0]][coord2[1]] && position[coord1[0]][coord1[1]] == position[coord3[0]][coord3[1]]) {
+            if (position[coord1[0]][coord1[1]] == "X") {
+                return "P1";
+            } else if (position[coord1[0]][coord1[1]] == "O") {
+                return "P2";
+            }
+        }
+        return "none";
+    }
+
+    function checkStatus (position) {
+        let cases = [[[0,0],[0,1],[0,2]],[[1,0],[1,1],[1,2]],[[2,0],[2,1],[2,2]]
+                    ,[[0,0],[1,0],[2,0]],[[0,1],[1,1],[2,1]],[[0,2],[1,2],[2,2]]
+                    ,[[0,0],[1,1],[2,2]],[[0,2],[1,1],[2,0]]];
+
+        for (let item of cases) {
+            let status = checkLine(position,item[0],item[1],item[2]);
+            if (status != "none") {
+                return status;
+            }
+        }
+        return null;
+    }
+
+    function minimax(position,depth,alpha,beta,maximizingPlayer) {
+        const state = checkStatus(position);
+        if (state == "P1") {
+            return -1;
+        } else if (state == "P2") {
+            return 1;
+        } else if (state == null) {
+        const branchValues = [];
+        let marker = maximizingPlayer ? "O":"X" ;
+        let count = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (position[i][j] == "") {
+                    count += 1;
+                    position[i][j] = marker;
+                    branchValues.push({
+                        move : [i,j],
+                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer)});
+                    position[i][j] = "";
+                }
+            }
+        }
+        if (count == 0) {
+            return 0;
+        } else {
+            if (maximizingPlayer == true) {
+                branchValues.sort((a,b) => {return b.value-a.value});
+                if (depth == 0) {
+                    return branchValues[0].move;
+                } else {
+                    return branchValues[0].value;
+                }
+            } else {
+                branchValues.sort((a,b) => {return a.value-b.value});
+                if (depth == 0) {
+                    return branchValues[0].move;
+                } else {
+                    return branchValues[0].value;
+                }
+            }
+        }
+        }
+    }
+    return {
+        calcMove
+    }
+})();
