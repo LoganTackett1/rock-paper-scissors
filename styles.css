@@ -81,7 +81,7 @@ body {
     font-size: calc(150px*var(--proportion));
 }
 
-.computer {
+.computer2 {
     font-size: calc(26px*var(--proportion));
     margin-right: calc(15px*var(--proportion));
     margin-bottom: calc(15px*var(--proportion));
@@ -93,7 +93,23 @@ body {
     background: transparent;
 }
 
-.computer:hover {
+.computer1 {
+    font-size: calc(26px*var(--proportion));
+    margin-left: calc(15px*var(--proportion));
+    margin-bottom: calc(15px*var(--proportion));
+    text-align: center;
+    grid-area: 1/2/2/-2;
+    justify-self: flex-start;
+    align-self: flex-end;
+    border: none;
+    background: transparent;
+}
+
+.computer1:hover {
+    color: red;
+}
+
+.computer2:hover {
     color: red;
 }
 

@@ -35,8 +35,11 @@ const Game = (function () {
             Game.p2Turn = !Game.p2Turn;
             Board.refresh();
             if (Game.winningRow == null) {
-                if (Game.p2Turn == true && Board.AITrue == true) {
-                    let aiMove = AI.calcMove(Game.array);
+                if (Game.p2Turn == true && Board.AI2True == true) {
+                    let aiMove = AI.calcMove(Game.array,"P2");
+                    doTurn(aiMove[0],aiMove[1]);
+                } else if (Game.p1Turn == true && Board.AI1True == true) {
+                    let aiMove = AI.calcMove(Game.array,"P1");
                     doTurn(aiMove[0],aiMove[1]);
                 }
             }
@@ -96,17 +99,34 @@ const Board = (function () {
 
     newGameBtn.addEventListener('click', () => {
         Game.reset();
+        if (Board.AI1True == true) {
+            let aiMove = AI.calcMove(Game.array,"P1");
+            Game.doTurn(aiMove[0],aiMove[1]);
+        }
     });
 
-    const AIBtn = document.querySelector('.computer');
-    const AITrue = false;
+    const AI1Btn = document.querySelector('.computer1');
+    const AI1True = false;
 
-    AIBtn.addEventListener('click', () => {
-        Board.AITrue = !Board.AITrue;
-        AIBtn.classList.toggle('off');
-        AIBtn.classList.toggle('on');
+    AI1Btn.addEventListener('click', () => {
+        Board.AI1True = !Board.AI1True;
+        AI1Btn.classList.toggle('off');
+        AI1Btn.classList.toggle('on');
+        if (Game.p1Turn == true) {
+            let aiMove = AI.calcMove(Game.array,"P1");
+            Game.doTurn(aiMove[0],aiMove[1]);
+        }
+    });
+
+    const AI2Btn = document.querySelector('.computer2');
+    const AI2True = false;
+
+    AI2Btn.addEventListener('click', () => {
+        Board.AI2True = !Board.AI2True;
+        AI2Btn.classList.toggle('off');
+        AI2Btn.classList.toggle('on');
         if (Game.p2Turn == true) {
-            let aiMove = AI.calcMove(Game.array);
+            let aiMove = AI.calcMove(Game.array,"P2");
             Game.doTurn(aiMove[0],aiMove[1]);
         }
     });
@@ -162,13 +182,14 @@ const Board = (function () {
     return {
         slots,
         refresh,
-        AITrue
+        AI1True,
+        AI2True
     }
 })()
 
 const AI = (function () {
-    const calcMove = function (board) {
-        return minimax(board,0,0,0,true);
+    const calcMove = function (board,player) {
+        return minimax(board,0,0,0,true,player);
     }
 
     function checkLine (position,coord1,coord2,coord3) {
@@ -196,15 +217,20 @@ const AI = (function () {
         return null;
     }
 
-    function minimax(position,depth,alpha,beta,maximizingPlayer) {
+    function minimax(position,depth,alpha,beta,maximizingPlayer,player) {
         const state = checkStatus(position);
-        if (state == "P1") {
+        if (state != player && state != null) {
             return -1;
-        } else if (state == "P2") {
+        } else if (state == player && state != null) {
             return 1;
         } else if (state == null) {
         const branchValues = [];
-        let marker = maximizingPlayer ? "O":"X" ;
+        let marker;
+        if (player == "P1") {
+            marker = maximizingPlayer ? "X":"O" ;
+        } else if (player == "P2") {
+            marker = maximizingPlayer ? "O":"X" ;
+        }
         let count = 0;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -213,7 +239,7 @@ const AI = (function () {
                     position[i][j] = marker;
                     branchValues.push({
                         move : [i,j],
-                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer)});
+                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer,player)});
                     position[i][j] = "";
                 }
             }
