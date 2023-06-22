@@ -155,8 +155,6 @@ const Board = (function () {
         return false;
     }
 
-//game reset is done, make the refresh function act as a reset for the visuals
-
     const refresh = function () {
         for (let slot of slots) {
             slot.textContent = `${Game.array[slot.classList[1][1]][slot.classList[1][2]]}`;
@@ -199,6 +197,25 @@ const Board = (function () {
 })()
 
 const AI = (function () {
+    function subSort(objectArr,minmax,...args) {
+        let n = args.length;
+        objectArr.sort((a,b) => {
+            let aVal = 0;
+            let bVal = 0;
+            for (let i = 0; i < n; i++) {
+                aVal += (10**(n-i))*(a[args[i]]);
+            }
+            for (let i = 0; i < n; i++) {
+                bVal += (10**(n-i))*(b[args[i]]);
+            }
+            if (minmax == "min") {
+                return aVal - bVal;
+            } else if (minmax == "max") {
+                return bVal - aVal;
+            }
+        });
+    }
+
     const calcMove = function (board,player) {
         return minimax(board,0,0,0,true,player).move;
     }
@@ -280,12 +297,11 @@ const AI = (function () {
                 }
             }
         }
-        // use depth to find shortest path
         if (maximizingPlayer == true) {
-            branchValues.sort((a,b) => {return b.value-a.value});
+            subSort(branchValues,"max","value","depth");
             return branchValues[0];
         } else {
-            branchValues.sort((a,b) => {return a.value-b.value});
+            subSort(branchValues,"min","value","depth");
             return branchValues[0];
         }
         
