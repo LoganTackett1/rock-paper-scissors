@@ -34,7 +34,7 @@ const Game = (function () {
             Game.p1Turn = !Game.p1Turn;
             Game.p2Turn = !Game.p2Turn;
             Board.refresh();
-            if (Game.winningRow == null) {
+            if (Game.winningRow == null && Game.winner == "none") {
                 if (Game.p2Turn == true && Board.AI2True == true) {
                     let aiMove = AI.calcMove(Game.array,"P2");
                     doTurn(aiMove[0],aiMove[1]);
@@ -67,6 +67,17 @@ const Game = (function () {
                 return item;
             }
         }
+            let count = 0;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (Game.array[i][j] == "") {
+                        count += 1;
+                    }
+                }
+            }
+            if (count == 0) {
+                Game.winner = "tie";
+            }
         return null;
     }
 
@@ -112,7 +123,7 @@ const Board = (function () {
         Board.AI1True = !Board.AI1True;
         AI1Btn.classList.toggle('off');
         AI1Btn.classList.toggle('on');
-        if (Game.p1Turn == true) {
+        if (Game.p1Turn == true && Game.winner == "none") {
             let aiMove = AI.calcMove(Game.array,"P1");
             Game.doTurn(aiMove[0],aiMove[1]);
         }
@@ -125,7 +136,7 @@ const Board = (function () {
         Board.AI2True = !Board.AI2True;
         AI2Btn.classList.toggle('off');
         AI2Btn.classList.toggle('on');
-        if (Game.p2Turn == true) {
+        if (Game.p2Turn == true && Game.winner == "none") {
             let aiMove = AI.calcMove(Game.array,"P2");
             Game.doTurn(aiMove[0],aiMove[1]);
         }
@@ -149,7 +160,7 @@ const Board = (function () {
     const refresh = function () {
         for (let slot of slots) {
             slot.textContent = `${Game.array[slot.classList[1][1]][slot.classList[1][2]]}`;
-            if (Game.winner != "none") {
+            if (Game.winner != "none" && Game.winner != "tie") {
                 if (arrayInList([slot.classList[1][1],slot.classList[1][2]],Game.winningRow)) {
                     slot.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
                 }
@@ -189,7 +200,7 @@ const Board = (function () {
 
 const AI = (function () {
     const calcMove = function (board,player) {
-        return minimax(board,0,0,0,true,player);
+        return minimax(board,0,0,0,true,player).move;
     }
 
     function checkLine (position,coord1,coord2,coord3) {
@@ -214,15 +225,39 @@ const AI = (function () {
                 return status;
             }
         }
+        
+        let count = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (position[i][j] == "") {
+                    count += 1;
+                }
+            }
+        }
+        if (count == 0) {
+            return "tie";
+        }
+        
         return null;
     }
 
     function minimax(position,depth,alpha,beta,maximizingPlayer,player) {
         const state = checkStatus(position);
-        if (state != player && state != null) {
-            return -1;
-        } else if (state == player && state != null) {
-            return 1;
+        if (state != player && state != null && state != "tie") {
+            return {
+                value: -1,
+                depth: depth
+            };
+        } else if (state == player) {
+            return {
+                value: 1,
+                depth: depth
+            };
+        } else if (state == "tie") {
+            return {
+                value: 0,
+                depth: depth
+            };
         } else if (state == null) {
         const branchValues = [];
         let marker;
@@ -231,39 +266,29 @@ const AI = (function () {
         } else if (player == "P2") {
             marker = maximizingPlayer ? "O":"X" ;
         }
-        let count = 0;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 if (position[i][j] == "") {
-                    count += 1;
                     position[i][j] = marker;
+                    let temp = minimax(position,depth-1,alpha,beta,!maximizingPlayer,player);
                     branchValues.push({
                         move : [i,j],
-                        value: minimax(position,depth-1,alpha,beta,!maximizingPlayer,player)
+                        value: temp.value,
+                        depth : temp.depth
                     })
                     position[i][j] = "";
                 }
             }
         }
-        if (count == 0) {
-            return 0;
+        // use depth to find shortest path
+        if (maximizingPlayer == true) {
+            branchValues.sort((a,b) => {return b.value-a.value});
+            return branchValues[0];
         } else {
-            if (maximizingPlayer == true) {
-                branchValues.sort((a,b) => {return b.value-a.value});
-                if (depth == 0) {
-                    return branchValues[0].move;
-                } else {
-                    return branchValues[0].value;
-                }
-            } else {
-                branchValues.sort((a,b) => {return a.value-b.value});
-                if (depth == 0) {
-                    return branchValues[0].move;
-                } else {
-                    return branchValues[0].value;
-                }
-            }
+            branchValues.sort((a,b) => {return a.value-b.value});
+            return branchValues[0];
         }
+        
         }
     }
     return {
